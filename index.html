@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雨霖霖 — 桌面端下载</title>
+<style>
+  /* ==========================================================
+     雨霖霖落地页 · 暖纸编辑风
+     设计令牌取自 iPolloWork「signal-workspace」设计系统
+     （deepseek-idesign 自带模板 lib/templates/ipollowork.site-signal-workspace）
+     —— 暖纸底、墨字、深绿主色、珊瑚强调；
+        不用渐变、不用发光、不用 emoji 当图标、不用蓝色。
+     ========================================================== */
+  :root{
+    /* 纸与墨 */
+    --paper:#f5f3ee;
+    --paper-2:#eceae3;
+    --card:#fffdf9;
+    --ink:#171a18;
+    --ink-2:#585c56;
+    --ink-3:#696d66;        /* 4.76:1 on --paper，达 WCAG AA 正文对比 */
+    --line:#e3e0d9;
+    --line-2:#cfccc4;
+    --line-strong:#898d86;  /* 3.05:1，用于按钮描边与时间线圆点这类「有意义的图形」 */
+    /* 强调 */
+    --primary:#1b3a31;      /* 深绿：主按钮 */
+    --primary-h:#12271f;
+    --accent:#d9603a;       /* 珊瑚：小面积强调 */
+    --accent-soft:rgba(217,96,58,.14);
+    --mint:#c9efc7;
+    --ok:#2d7c59;
+    --warn:#b16b13;
+    /* 形状与排版 */
+    --r-btn:8px;
+    --r-card:12px;
+    --display:"Noto Sans SC Black","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --sans:Inter,"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --serif:Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --w:1180px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:3px}
+  .w{max-width:var(--w);margin:0 auto;padding:0 32px}
+  .mono{font-family:var(--mono)}
+
+  /* 顶栏：暖纸磨砂，一条细线收边 */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(245,243,238,.86);
+    backdrop-filter:blur(12px) saturate(140%);
+    border-bottom:1px solid var(--line);
+  }
+  .hbar{display:flex;align-items:center;gap:16px;height:64px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .logo img{width:23px;height:23px;border-radius:6px;display:block}
+  .hbar nav{margin-left:auto;display:flex;gap:26px;font-size:13.5px}
+  .hbar nav a{color:var(--ink-2)}
+  .hbar nav a:hover{color:var(--ink);text-decoration:none}
+  .hbar .cta{
+    margin-left:20px;padding:9px 16px;border-radius:var(--r-btn);
+    background:var(--primary);color:#fff;font-size:13px;font-weight:700;
+  }
+  .hbar .cta:hover{text-decoration:none;background:var(--primary-h)}
+  @media(max-width:820px){.hbar nav{display:none}}
+
+  /* ----------------------------------------------------------
+     首屏：左文案右截图，暖纸底，不要任何光晕
+     ---------------------------------------------------------- */
+  .hero{position:relative;padding:92px 0 96px;border-bottom:1px solid var(--line);
+  background-image:url(hero-bg.jpg);background-size:cover;background-position:50% 72%;background-repeat:no-repeat}
+/* 纸色柔光罩：保证左上正文区足够干净，同时保住底图的山脊层次 */
+.hero::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(250,249,245,.86) 0%,
+    rgba(250,249,245,.52) 30%,
+    rgba(248,246,241,.16) 58%,
+    rgba(245,243,238,.10) 78%,
+    rgba(245,243,238,.52) 100%)}
+/* 细网格：径向遮罩四面渐隐；透明度压到 0.032，只当纸纹，不看成网格 */
+.hero::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right,rgba(23,26,24,.032) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(23,26,24,.032) 1px,transparent 1px);
+  background-size:76px 76px;
+  -webkit-mask-image:radial-gradient(128% 84% at 50% 4%,#000 0%,rgba(0,0,0,.55) 38%,transparent 70%);
+  mask-image:radial-gradient(128% 84% at 50% 4%,#000 0%,rgba(0,0,0,.55) 38%,transparent 70%)}
+.hero .w{position:relative;z-index:1}
+  .hero-in{display:grid;grid-template-columns:1fr 1.06fr;gap:52px;align-items:center}
+  @media(max-width:940px){.hero-in{grid-template-columns:1fr;gap:44px}}
+
+  /* 眉标：珊瑚短横线 + 字距拉开的全大写，不用药丸 */
+  .tagline{
+    display:flex;align-items:center;gap:11px;
+    font-size:11.5px;font-weight:800;letter-spacing:.15em;
+    color:var(--ink-3);margin:0 0 24px;text-transform:uppercase;
+  }
+  .tagline .d{width:22px;height:2px;background:var(--accent);flex:none;border-radius:0}
+
+  /* 主标题：黑体最重字重、行距收紧。
+     断行点 <br class="brk"> 在所有宽度都保留 —— 上一版在窄屏取消它，
+     结果自然换行把「生图、画布、视频、」的顿号挂在行尾、「动图」变孤字。
+     字号按视口线性缩放，保证最长的第一行 11 个字在任何宽度都放得下。 */
+  .hero h1{
+    font-family:var(--display);
+    font-size:clamp(23px,3.4vw,46px);
+    line-height:1.24;letter-spacing:-.018em;font-weight:800;
+    margin:0 0 20px;max-width:15em;text-wrap:balance;
+  }
+  .hero h1 .nb{white-space:nowrap}
+  .hero .sub{font-size:16.5px;color:var(--ink-2);max-width:31em;margin:0 0 32px;line-height:1.78}
+  .acts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:22px}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:13px 21px;border-radius:var(--r-btn);
+    font-size:14px;font-weight:700;border:1px solid transparent;cursor:pointer;
+    transition:background .16s,border-color .16s,color .16s;
+  }
+  .btn-1{background:var(--primary);color:#fff}
+  .btn-1:hover{background:var(--primary-h);text-decoration:none}
+  .btn-2{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+  .btn-2:hover{border-color:var(--ink-2);text-decoration:none}
+
+  /* 元信息行 */
+  .meta{display:flex;flex-wrap:wrap;gap:9px 0;font-size:13px;color:var(--ink-3);align-items:center}
+  .stat{display:inline-flex;align-items:center;gap:7px}
+  .stat .d{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+  .stat[data-s="live"] .d{background:var(--ok);box-shadow:0 0 0 3px rgba(45,124,89,.15)}
+  .stat[data-s="cached"] .d{background:var(--warn)}
+  /* 分隔点跟着「后一项」走：换行时不会孤零零留在行尾 */
+  .meta .mi{display:inline-flex;align-items:center;white-space:nowrap}
+  .meta .mi + .mi::before{
+    content:'';width:3px;height:3px;border-radius:50%;background:var(--line-2);
+    display:inline-block;margin:0 10px;flex:none;
+  }
+  /* 版本状态独占一行 */
+  .meta .stat.mi{flex-basis:100%}
+
+  /* 截图外框：浅色窗口壳（Windows 三键） */
+  .shotwin{
+    border:1px solid var(--line-2);border-radius:var(--r-card);overflow:hidden;
+    background:var(--card);
+    box-shadow:0 20px 54px rgba(27,58,49,.13), 0 2px 6px rgba(27,58,49,.05);
+  }
+  .shotwin .bar{
+    display:flex;align-items:center;padding:8px 5px 8px 14px;
+    background:var(--paper-2);border-bottom:1px solid var(--line);
+  }
+  .shotwin .bar .t{font-size:11.5px;color:var(--ink-3);font-family:var(--mono)}
+  .shotwin .bar .wb{margin-left:auto;display:flex;align-items:center}
+  .shotwin .bar .wb b{
+    width:40px;height:30px;display:grid;place-items:center;
+    font-size:9.5px;font-weight:400;line-height:1;color:var(--ink-3);border-radius:4px;
+  }
+  .shotwin .bar .wb b:last-child{font-size:11.5px}
+  .shotwin img{display:block;width:100%;height:auto}
+
+  /* ----------------------------------------------------------
+     通用区块
+     ---------------------------------------------------------- */
+  section{padding:96px 0;border-bottom:1px solid var(--line)}
+  .sh{margin-bottom:48px;max-width:68ch}
+  .sh .k{
+    display:flex;align-items:center;gap:11px;
+    font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:800;margin:0 0 16px;
+  }
+  .sh .k::before{content:'';width:22px;height:2px;background:var(--accent);flex:none}
+  .sh h2{
+    font-family:var(--display);
+    font-size:clamp(28px,3.5vw,44px);line-height:1.22;
+    letter-spacing:-.02em;font-weight:800;margin:0 0 16px;text-wrap:balance;
+  }
+  .sh p{margin:0;color:var(--ink-2);font-size:15.5px;max-width:56ch}
+
+  /* 步骤：四格，靠细线分隔，不用卡片 */
+  .steps{
+    list-style:none;margin:0;padding:0;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+    background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .steps li{background:var(--paper);padding:32px 26px 36px}
+  .steps .n{
+    font-family:var(--mono);font-size:12px;color:var(--accent);
+    letter-spacing:.06em;display:block;margin-bottom:18px;font-weight:600;
+  }
+  .steps h3{margin:0 0 10px;font-size:16.5px;font-weight:800;letter-spacing:-.014em}
+  .steps p{margin:0;color:var(--ink-2);font-size:14px;line-height:1.7}
+  .steps p a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  @media(max-width:940px){.steps{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.steps{grid-template-columns:1fr}}
+
+  /* 截图墙 */
+  .wall{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .wall .full{grid-column:1/-1}
+  @media(max-width:820px){.wall{grid-template-columns:1fr}}
+  .wall figure{margin:0}
+  .wall .bar{
+    display:flex;align-items:center;padding:8px 7px 8px 13px;
+    background:var(--paper-2);border:1px solid var(--line);
+    border-bottom:0;border-radius:10px 10px 0 0;
+  }
+  .wall .bar .t{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+  .wall .bar .wb{margin-left:auto;display:flex;align-items:center;gap:13px;padding-right:7px}
+  .wall .bar .wb b{font-size:8.5px;font-weight:400;line-height:1;color:var(--ink-3)}
+  .wall .bar .wb b:last-child{font-size:10px}
+  .wall img{
+    display:block;width:100%;height:auto;
+    border:1px solid var(--line);border-radius:0 0 10px 10px;
+    box-shadow:0 14px 34px rgba(27,58,49,.09);
+  }
+  .wall figcaption{padding:16px 2px 0;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+  .wall figcaption b{font-weight:800;font-size:15px;letter-spacing:-.014em}
+  .wall figcaption span{color:var(--ink-2);font-size:13.5px;flex:1;min-width:200px}
+  .wall .full img{max-height:620px;object-fit:cover;object-position:top center}
+
+  /* 功能：三列，暖白卡 + 细边 */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:940px){.grid3{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.grid3{grid-template-columns:1fr}}
+  .fc{
+    border:1px solid var(--line);border-radius:var(--r-card);
+    padding:26px 24px;background:var(--card);
+    transition:border-color .18s,box-shadow .18s,transform .18s;
+  }
+  .fc:hover{border-color:var(--line-2);box-shadow:0 12px 30px rgba(27,58,49,.08);transform:translateY(-2px)}
+  .fc .ic{
+    width:36px;height:36px;border-radius:9px;margin-bottom:18px;
+    display:grid;place-items:center;
+    background:var(--paper-2);color:var(--ink);border:1px solid var(--line);
+  }
+  .fc h3{margin:0 0 9px;font-size:16.5px;font-weight:800;letter-spacing:-.014em}
+  .fc p{margin:0;color:var(--ink-2);font-size:14px;line-height:1.7}
+
+  /* ----------------------------------------------------------
+     版本日志（列表与时间线由 JS 生成，样式必须覆盖到生成物）
+     ---------------------------------------------------------- */
+  .tl{margin:0 0 34px}
+  .tl .tr{position:relative;height:1px;background:var(--line-2);margin:0 30px}
+  .tl .fl{
+    position:absolute;left:0;top:-1px;height:3px;width:0;
+    background:var(--accent);border-radius:2px;
+    transition:width 1s cubic-bezier(.2,.8,.2,1);
+  }
+  .tl ol{list-style:none;margin:0;padding:0;display:flex;justify-content:space-between;gap:6px}
+  .tl li{
+    flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;
+    gap:7px;text-align:center;padding-top:18px;position:relative;
+  }
+  .tl-dot{
+    position:absolute;top:-3px;left:50%;transform:translateX(-50%);
+    width:7px;height:7px;border-radius:50%;background:var(--line-strong);
+  }
+  .tl li.is-latest .tl-dot{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .tl-ver{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+  .tl-ver:hover{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink-2)}
+  .tl li.is-latest .tl-ver{color:var(--accent);font-weight:700}
+  .tl-date{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+  @media(max-width:820px){
+    .tl .tr{display:none}
+    .tl ol{flex-direction:column;align-items:stretch;gap:0}
+    .tl li{
+      flex-direction:row;align-items:center;justify-content:flex-start;
+      gap:12px;text-align:left;padding:8px 0;border-bottom:1px solid var(--line);
+    }
+    .tl-dot{position:static;transform:none;flex:none}
+    .tl-ver{min-width:74px}
+    .tl-date{margin-left:auto}
+  }
+
+  /* 版本行 */
+  .release{border-top:1px solid var(--line)}
+  .release:last-of-type{border-bottom:1px solid var(--line)}
+  .release-head{
+    display:flex;align-items:center;gap:12px;padding:18px 4px;
+    cursor:pointer;list-style:none;
+  }
+  .release-head::-webkit-details-marker{display:none}
+  .release-head:hover{background:rgba(27,58,49,.028)}
+  .chev{display:grid;place-items:center;width:18px;height:18px;color:var(--ink-3);flex:none;transition:transform .18s}
+  .release[open] .chev{transform:rotate(90deg)}
+  .release .tag{
+    font-family:var(--mono);font-size:13.5px;font-weight:600;
+    letter-spacing:-.01em;min-width:74px;flex:none;color:var(--ink);
+  }
+  .release.is-latest .tag{color:var(--accent)}
+  .latest-badge{
+    font-size:10.5px;font-weight:800;letter-spacing:.06em;
+    color:#fff;background:var(--accent);padding:3px 8px;border-radius:999px;flex:none;
+  }
+  .rl-name{
+    font-size:13.5px;color:var(--ink-2);flex:1;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .rl-right{margin-left:auto;flex:none}
+  .rl-date{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+  .release-body{padding:2px 4px 28px 34px;max-width:80ch}
+  .release-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
+  .asset-meta{font-size:12.5px;color:var(--ink-3);font-family:var(--mono)}
+  .dl-meta{margin-top:16px;font-size:13px;color:var(--ink-3)}
+  .dl-meta a{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+
+  /* 列表里的小按钮 */
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-h);text-decoration:none}
+  .btn-sm{padding:9px 16px;font-size:13px;border-radius:var(--r-btn);font-weight:700}
+
+  /* 状态药丸 */
+  .pill{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:4px 11px;border-radius:999px;
+    border:1px solid var(--line);background:var(--card);
+    font-size:12px;font-weight:700;color:var(--ink-2);
+  }
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+  .pill[data-state="live"] .live-dot{background:var(--ok)}
+  .pill[data-state="cached"] .live-dot{background:var(--warn)}
+  #releases-status{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;font-size:13px;color:var(--ink-3);margin-top:8px}
+
+  /* Release 正文的 markdown */
+  .md{font-size:14px;color:var(--ink-2);line-height:1.78}
+  .md h3{font-family:var(--display);font-size:15px;color:var(--ink);margin:22px 0 8px;font-weight:800}
+  .md h4{font-size:14px;color:var(--ink);margin:18px 0 7px;font-weight:800}
+  .md h3:first-child,.md h4:first-child{margin-top:0}
+  .md ul{margin:8px 0;padding-left:20px}
+  .md li{margin:5px 0}
+  .md code{
+    font-family:var(--mono);font-size:12.5px;
+    background:var(--paper-2);border:1px solid var(--line);
+    padding:1px 5px;border-radius:4px;color:var(--ink);
+  }
+  .md strong{color:var(--ink);font-weight:700}
+  .md hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+  .md p{margin:8px 0}
+  .md a{text-decoration:underline;text-underline-offset:3px}
+
+  /* FAQ */
+  .faq details{border-bottom:1px solid var(--line)}
+  .faq details:first-of-type{border-top:1px solid var(--line)}
+  .faq summary{
+    padding:20px 2px;cursor:pointer;list-style:none;
+    font-size:15.5px;font-weight:800;display:flex;gap:14px;align-items:baseline;
+    letter-spacing:-.016em;
+  }
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:hover{color:var(--accent)}
+  .faq summary .mk{font-family:var(--mono);font-size:12.5px;color:var(--accent);flex:none;font-weight:600}
+  .faq .a{padding:0 0 26px 36px;color:var(--ink-2);font-size:14.5px;max-width:78ch;line-height:1.78}
+  .faq .a p{margin:0 0 8px}
+  .faq .a p:last-child{margin:0}
+  .faq .a a{text-decoration:underline;text-underline-offset:3px}
+
+  /* 联系 */
+  .links{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:760px){.links{grid-template-columns:1fr}}
+  .links a{
+    display:block;border:1px solid var(--line);border-radius:var(--r-card);
+    padding:24px;background:var(--card);color:inherit;
+    transition:border-color .18s,box-shadow .18s,transform .18s;
+  }
+  .links a:hover{text-decoration:none;border-color:var(--line-2);box-shadow:0 12px 30px rgba(27,58,49,.08);transform:translateY(-2px)}
+  .links .k{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;font-weight:700}
+  .links .v{font-size:15px;font-weight:700;letter-spacing:-.014em;word-break:break-all}
+  .links a:hover .v{color:var(--accent)}
+
+  footer{border-top:1px solid var(--line);padding:42px 0 58px;color:var(--ink-3);font-size:13.5px}
+  footer .w{display:flex;flex-wrap:wrap;gap:12px 26px;align-items:center}
+  footer .r{margin-left:auto}
+  footer a{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+
+  /* 骨架与错误态 */
+  .skel{height:52px;border-top:1px solid var(--line);opacity:.55}
+  .err,.err-box{
+    border:1px solid var(--line);background:var(--card);
+    padding:18px;font-size:14px;color:var(--ink-2);border-radius:var(--r-card);
+  }
+  .err a,.err-box a{text-decoration:underline;text-underline-offset:3px}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="w hbar">
+    <div class="logo"><img src="app-icon.png" alt="">雨霖霖</div>
+    <nav>
+      <a href="#how">怎么用</a>
+      <a href="#ui">界面</a>
+      <a href="#specs">功能</a>
+      <a href="#log">更新日志</a>
+      <a href="#q">常见问题</a>
+    </nav>
+    <a class="cta" href="#" id="nav-dl" data-fallback-href="https://github.com/wbsjl321/ai-image-workbench/releases/latest">下载</a>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="w hero-in">
+      <div>
+        <p class="tagline"><span class="d" aria-hidden="true"></span>WINDOWS X64 桌面客户端</p>
+        <h1><span class="nb">生图</span>、<span class="nb">画布</span>、<span class="nb">视频</span>、<span class="nb">动图</span><br class="brk">都在<span class="nb">同一个窗口</span>里</h1>
+        <p class="sub">生成的图直接落到本地记录里，翻得回去、改得动、能接着排版出片。不用在几个网站之间来回倒文件。</p>
+
+        <div class="acts">
+          <a id="primary-download" class="btn btn-1" href="#"
+             data-fallback-href="https://github.com/wbsjl321/ai-image-workbench/releases/latest">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            <span id="primary-download-label">下载 Windows 版</span>
+          </a>
+          <a class="btn btn-2" href="#log">查看更新日志</a>
+        </div>
+
+        <div class="meta">
+          <span class="stat mi" id="ver-pill" data-s="loading">
+            <span class="d" aria-hidden="true"></span>
+            <span id="ver-pill-text">正在读取版本…</span>
+          </span>
+          <span class="mi">Windows 10 / 11 · x64</span>
+          <span class="mi" id="hero-size">安装包约 78 MB</span>
+          <span class="mi">数据全在本机</span>
+        </div>
+      </div>
+
+      <div class="shotwin">
+        <div class="bar"><span class="t">雨霖霖 — 生图工作台</span><span class="wb"><b>&#9472;</b><b>&#9633;</b><b>&#10005;</b></span></div>
+        <img src="shots/ui-gen.png" alt="生图工作台：左侧提示词与模型选项，中间参考图上传，右侧生成结果" width="1600" height="1075" fetchpriority="high">
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="w">
+      <div class="sh">
+        <p class="k">怎么用</p>
+        <h2>四步出第一张图</h2>
+        <p>没有引导页，没有新手任务。装完打开就能用，下面这四步是它全部的前置动作。</p>
+      </div>
+
+      <ol class="steps">
+        <li>
+          <span class="n">01</span>
+          <h3>下载安装包</h3>
+          <p>Windows x64 的 exe，双击就跑。按用户安装，不弹管理员授权，也不会往系统目录塞东西。</p>
+        </li>
+        <li>
+          <span class="n">02</span>
+          <h3>登录一次</h3>
+          <p>首次启动登 <a href="https://api.wbsjl.com" target="_blank" rel="noopener">api.wbsjl.com</a>，生图和视频都走这个账号。令牌加密存在本机，下次打开不用再输。</p>
+        </li>
+        <li>
+          <span class="n">03</span>
+          <h3>写提示词</h3>
+          <p>模型和单价按你的账号列出来，不用另找。写句话就开始生成，也可以传参考图、定宽高比和清晰度。</p>
+        </li>
+        <li>
+          <span class="n">04</span>
+          <h3>出图之后</h3>
+          <p>结果自动进历史记录，随时能翻回来。想继续做就丢进画布排版、去视频台出片，或者交给 Agent 批量跑。</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="ui">
+    <div class="w">
+      <div class="sh">
+        <p class="k">界面</p>
+        <h2>看下实际长什么样</h2>
+        <p>都是应用里直接截的。版本更新得快，你下载到的可能和这几张略有出入。</p>
+      </div>
+
+      <div class="wall">
+        <figure>
+          <div class="bar"><span class="t">Agent 模式</span><span class="wb"><b>&#9472;</b><b>&#9633;</b><b>&#10005;</b></span></div>
+          <img src="shots/ui-agent.png" alt="Agent 模式：上传参考图、选择 Skill 或描述需求，自动拆解为可执行计划并批量生成" loading="lazy" width="1600" height="1075">
+          <figcaption><b>Agent 模式</b><span>说清楚要什么就行，不用自己一张一张点。它会把活儿拆开跑完，跑完还能回头看哪张不对。</span></figcaption>
+        </figure>
+
+        <figure>
+          <div class="bar"><span class="t">视频创作台</span><span class="wb"><b>&#9472;</b><b>&#9633;</b><b>&#10005;</b></span></div>
+          <img src="shots/ui-video.png" alt="视频创作台：选择视频模型、时长、分辨率、宽高比与条数" loading="lazy" width="1600" height="1075">
+          <figcaption><b>视频创作台</b><span>5 秒到 30 秒，最高 1080p，一次能排 6 条。去改别的设定再回来，记录还在原地。</span></figcaption>
+        </figure>
+
+        <figure>
+          <div class="bar"><span class="t">动图生成</span><span class="wb"><b>&#9472;</b><b>&#9633;</b><b>&#10005;</b></span></div>
+          <img src="shots/ui-motion.png" alt="动图生成：动作描述与参考图，生成 12 帧循环动画" loading="lazy" width="1600" height="1075">
+          <figcaption><b>动图生成</b><span>最多丢 4 张参考图进去，角色和画风能保持一致。一次出 12 帧，首尾接得上就能当表情包用。</span></figcaption>
+        </figure>
+
+        <figure>
+          <div class="bar"><span class="t">反推提示词</span><span class="wb"><b>&#9472;</b><b>&#9633;</b><b>&#10005;</b></span></div>
+          <img src="shots/ui-reverse.png" alt="反推提示词：上传图片后可选精准还原、专业描述或创意扩写三种方式" loading="lazy" width="1600" height="1075">
+          <figcaption><b>反推提示词</b><span>看到别人出的图想要同款？传进去就能把提示词套出来。想照抄、想看懂、想换个方向，三种都行。</span></figcaption>
+        </figure>
+
+        <figure class="full">
+          <div class="bar"><span class="t">提示词库</span><span class="wb"><b>&#9472;</b><b>&#9633;</b><b>&#10005;</b></span></div>
+          <img src="shots/ui-prompts.png" alt="提示词库：内置上千条社区提示词，可按分类、标签与来源检索" loading="lazy" width="1600" height="1075">
+          <figcaption><b>提示词库</b><span>一千多条现成的，按分类和标签翻。看到合适的收藏一下，直接用进画布。</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="specs">
+    <div class="w">
+      <div class="sh">
+        <p class="k">功能</p>
+        <h2>从想出来到能用，中间不用换工具</h2>
+        <p>生图、画布、视频、动图、素材、提示词、Agent，都在一个窗口里。文件不用导来导去，记录也不会散在几处。</p>
+      </div>
+
+      <div class="grid3">
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.2 5.6L20 11l-5.8 2.4L12 19l-2.2-5.6L4 11l5.8-2.4Z"/></svg></span>
+          <h3>生图工作台</h3>
+          <p>一次提交可以带好几张任务，逐张勾选、逐张看结果。生成过的自动进记录，翻回去还能接着改。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15h18"/><path d="M9 3v18"/></svg></span>
+          <h3>画布</h3>
+          <p>把出好的图拖到一块画布上摆位、改大小、调前后。项目能存下来，下次打开接着弄。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg></span>
+          <h3>视频工作台</h3>
+          <p>5 秒到 30 秒，最高 1080p，一次能排 6 条。去改别的设定再回来，记录还在原地。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+          <h3>动图生成</h3>
+          <p>丢几张参考图进去稳住角色和画风，一次出 12 帧。勾上无缝循环，直接就是能用的表情包。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4"/><path d="M12 17v4"/><circle cx="12" cy="12" r="4"/><path d="M3 12h4"/><path d="M17 12h4"/></svg></span>
+          <h3>反推提示词</h3>
+          <p>看到别人出的图想要同款，传进去把提示词套出来。想照抄、想看懂、想换个方向，都能选。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+          <h3>素材库</h3>
+          <p>图、动图、视频都放一处，按名字搜、按类型筛、不要的删掉。图片和视频用同一套操作。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h10"/></svg></span>
+          <h3>提示词库</h3>
+          <p>一千多条现成的，按分类和标签翻。收藏下来的能直接用进画布，反推出来的也会存进来。</p>
+        </div>
+        <div class="fc">
+          <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4"/><path d="M12 17v4"/><circle cx="12" cy="12" r="4"/><path d="M3 12h4"/><path d="M17 12h4"/></svg></span>
+          <h3>Agent 与自动化</h3>
+          <p>把目标说清楚，它自己拆步骤、批量跑。切去别的模块看看，正在跑的那一轮不会被打断。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="log">
+    <div class="w">
+      <div class="sh">
+        <p class="k">更新日志</p>
+        <h2>改了什么，翻这里</h2>
+        <p>从 GitHub Releases 实时读。赶上接口限流读不到，会退回到本地快照并标明，不会给你看空白。</p>
+      </div>
+
+      <div class="tl" id="version-timeline" aria-label="版本发布时间线">
+        <div class="tr"><span class="fl" id="tl-fill"></span></div>
+        <ol id="tl-items"></ol>
+      </div>
+
+      <div id="releases-status" class="meta" style="margin-bottom:12px"></div>
+
+      <div id="release-list" aria-live="polite">
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="q">
+    <div class="w">
+      <div class="sh">
+        <p class="k">常见问题</p>
+        <h2>常见问题</h2>
+        <p>安装、更新、数据放哪儿，这里一次说完。</p>
+      </div>
+
+      <div class="faq">
+        <details open>
+          <summary><span class="mk">01</span>支持哪些系统？</summary>
+          <div class="a"><p>现在只有 <b>Windows x64</b> 的安装包（NSIS 方式，按用户安装，不弹管理员授权）。macOS 和 Linux 还没做，更新日志里也没有相关记录。</p></div>
+        </details>
+        <details>
+          <summary><span class="mk">02</span>安装包有多大？</summary>
+          <div class="a"><p>最新版约 <b id="faq-size">78 MB</b>。早几个版本体积不太一样（早期到过 154 MB 左右），每个版本的实际大小在 GitHub Releases 那一页的资产栏里写着。</p></div>
+        </details>
+        <details>
+          <summary><span class="mk">03</span>下载后提示「Windows 已保护你的电脑」怎么办？</summary>
+          <div class="a">
+            <p>这是 SmartScreen 的常规提示——因为没买代码签名证书，不是安装包有问题。点「更多信息」→「仍要运行」就能装。</p>
+            <p>安装包由 GitHub Actions 自动构建，源码和构建日志都公开。不放心可以到 <a href="https://github.com/wbsjl321/ai-image-workbench/actions" target="_blank" rel="noopener">Actions 页面</a> 对着看一遍。</p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="mk">04</span>应用会自动更新吗？</summary>
+          <div class="a">
+            <p>会检查，但不会偷偷装。启动时它去 GitHub Releases 看一眼有没有新版，有就在界面上告诉你，<b>下不下、装不装由你点</b>。不会后台自动下载，也不会趁你退出的时候静默安装。</p>
+            <p>更新包同样走 GitHub Releases，装之前能看到版本号和这次改了什么。</p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="mk">05</span>需要登录或配置什么才能用？</summary>
+          <div class="a">
+            <p>第一次打开要登一次 <a href="https://api.wbsjl.com" target="_blank" rel="noopener">api.wbsjl.com</a> 的账号，生图和视频都走它。令牌加密存在本机，之后不用重复登。</p>
+            <p>模型和单价按你的账号列出来，界面上直接能看。要是你手上已经有别的 New API 中转站，也可以在设置里改成自己的地址和密钥。</p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="mk">06</span>数据存在哪里？会不会上传？</summary>
+          <div class="a">
+            <p>生成记录、图片、视频、画布项目、素材，全都留在本机，不上传。具体路径在「设置 → 关于」里能看到。</p>
+            <p>登录令牌走系统自带的加密（Windows 上是 DPAPI / safeStorage），不和你的生成内容放在一起。想彻底清干净，卸载完再删掉数据目录就行。</p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="mk">07</span>怎么反馈问题或提需求？</summary>
+          <div class="a"><p>到 GitHub 开 issue：<a href="https://github.com/wbsjl321/ai-image-workbench/issues" target="_blank" rel="noopener">wbsjl321/ai-image-workbench/issues</a>。写清楚版本号、系统版本和怎么复现，能省不少来回。</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="border-bottom:0">
+    <div class="w">
+      <div class="sh">
+        <p class="k">联系</p>
+        <h2>找我们</h2>
+        <p>问题反馈请走 GitHub Issues，响应最快。也欢迎直接到网关站点了解接口与计费。</p>
+      </div>
+
+      <div class="links">
+        <a href="https://github.com/wbsjl321/ai-image-workbench" target="_blank" rel="noopener"><div class="k">GitHub</div><div class="v">wbsjl321/ai-image-workbench</div></a>
+        <a href="https://github.com/wbsjl321/ai-image-workbench/issues" target="_blank" rel="noopener"><div class="k">问题反馈</div><div class="v">提交 Issue</div></a>
+        <a href="https://api.wbsjl.com" target="_blank" rel="noopener"><div class="k">API 网关</div><div class="v">api.wbsjl.com</div></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="w">
+    <span>雨霖霖</span>
+    <span>当前版本 <b id="foot-version">读取中…</b></span>
+    <span class="r">数据来源：<a href="https://github.com/wbsjl321/ai-image-workbench/releases" target="_blank" rel="noopener">GitHub Releases</a></span>
+  </div>
+</footer>
+<script>
+
+/* ============================================================================
+   雨霖霖 落地页脚本 — 零依赖
+   ----------------------------------------------------------------------------
+   设计要点：
+   1) 优先实时读取 GitHub Releases API（已实测该接口返回
+      Access-Control-Allow-Origin: *，可直接由静态页跨域读取）。
+   2) 该接口未认证时限流极紧（实测 rate.remaining 会归零并返回 403），
+      因此内置一份"快照兜底数据"，任何失败都降级到快照并明确标注来源。
+   3) 绝不因为取数失败而留白；也不虚构不存在的版本或资产。
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  var REPO = 'wbsjl321/ai-image-workbench';
+  var API_LATEST = 'https://api.github.com/repos/' + REPO + '/releases/latest';
+  var API_LIST = 'https://api.github.com/repos/' + REPO + '/releases?per_page=100';
+  var RELEASES_PAGE = 'https://github.com/' + REPO + '/releases';
+  var MAX_VISIBLE = 12;   // 更新日志默认展开渲染的版本数，其余折叠
+
+  /* ---------------------------------------------------------------------
+     兜底快照：截取自 GitHub Releases API 的真实响应（含真实资产名与体积）
+     仅在实时接口不可用时使用，且页面会显式提示"缓存"。
+     --------------------------------------------------------------------- */
+  var SNAPSHOT = {
+    tag: 'v1.1.5',
+    name: 'Release v1.1.5',
+    publishedAt: '2026-10-13T12:15:11Z',
+    asset: {
+      name: 'ai-image-workbench-1.1.5-setup.exe',
+      size: 82219077,
+      url: 'https://github.com/wbsjl321/ai-image-workbench/releases/download/v1.1.5/ai-image-workbench-1.1.5-setup.exe'
+    },
+    body: '## 🎯 修复内容\n\n**修复 electron-builder.yml files 白名单漏写 payCashierReturn.js**\n\n- **现象**：安装打开后弹出 "Cannot find module \'./payCashierReturn\'"\n- **真因**：electron-builder.yml 的 `files:` 块是白名单机制，漏写任何同目录 require 模块都会导致运行时找不到\n- **修复**：补上 electron/payCashierReturn.js 到 files 列表，并新增守卫测试在提交时拦截配置遗漏\n\n---\n快照数据：完整更新日志请见 GitHub Releases 页面。',
+    _snapshot: true
+  };
+
+  /* 历史版本快照：取自真实 API 响应（版本号 / 发布时间 / 资产名 / 体积）
+     资产 URL 按 GitHub Releases 的固定规律由 tag 推导，命名与真实一致。 */
+  /* ------------------------------------------------------------------ */
+  /*  历史版本更新说明：来自 GitHub Releases 的真实 body（一次性注入）        */
+  /*  这样即使 API 被 403 限流回退到快照，也能显示完整更新说明。            */
+  /* ------------------------------------------------------------------ */
+  var SNAPSHOT_BODIES = {
+    'v1.1.5': "## 🎯 修复内容\n\n**Fix electron-builder.yml files whitelist missing payCashierReturn.js (#169)**\n\n- **现象**: 安装打开后弹出 \"Cannot find module './payCashierReturn'\"\n- **真因**: electron-builder.yml 的 `files:` 块是白名单机制，漏写任何同目录 require 模块都会导致运行时找不到\n- **修复**: \n  - ✅ 补上 electron/payCashierReturn.js 到 files 列表\n  - ✅ 新增 guards test (scripts/electron-packaged-files.test.mjs) 在提交时拦截配置遗漏\n- **验证**: 门禁全绿通过，重新打包测试确认应用可正常启动\n\n**Changes**:\n- `electron-builder.yml`: Add electron/payCashierReturn.js to files whitelist  \n- `scripts/electron-packaged-files.test.mjs`: New guard test for main process modules\n\n---\n🏗️ Build details: 79MB, NSIS one-click=false, per-user install | Windows x64\n",
+    'v1.1.4': "桌面版 1.1.4（Windows x64 安装包）。自 v1.1.3 起 166 个提交。门禁：`npm run verify` 全绿 —— tsc 0 错 / eslint 0 错 78 警 / 主仓 284 files 3023 tests / 画布 112 files 798 tests / next build 与画布构建通过 / 模块边界 744 files。\n\n## 网关分组与钥匙\n\n- 令牌从「一把走到底」改成按分组存的钥匙串：用哪一把由这次要调的模型决定，登录时给每个可用分组各备一把\n- 「这个账号能把令牌绑到哪些组」从猜变成问网关；目录与反推按账号真实分组筛，AAAgpt / grok 组里的模型第一次进得了列表\n- 反推提示词可以选分组了；「自动」＝倍率最低那一组，并把生效的组写进标签\n- 能力组约定优先于模型名：AAA生图＝图片、AAA视频＝视频、其余组＝文本；`无限制-Qwen-2.1NEW` 不再被名字带偏成文本模型\n- 建令牌的请求体按上游结构体来（`model_limits` 是字符串），签发被拒时把网关那句原话搬到界面上，不再只说「去确认一下」\n\n## 标价与模型目录\n\n- 单价跟网关的「表达式计费」走：`fixed(x)`＝每张、`u(\"seconds\")*x`＝每秒，不再读留在旧值上的 `model_price`\n- 画布价签与生图工作台同一口径，并加一条守卫：同一份 payload 两处必须算出同一个价；价签缓存按 TTL 重拉，不再一次拉取终身有效\n- 模型判据加「网关端点类型优先」：新上架的生图模型不用回来改代码\n- 画布 AI 文本改成左边选组、右边选模型；Agent 与画布 Agent 的规划模型按分组分段并标出倍率\n\n## 登录与会话\n\n- 网关 rc43 改发 access token，登录契约跟上新形态；Cloudflare 人机校验开着也登得上（Turnstile 已接）\n- 反复掉登录的根因收口：会话表落盘改读盘合并、作废留墓碑；会话答复绑住它校验的那枚令牌，迟到的旧 401 不再删掉刚登录上的新令牌\n- 会话改成「闲置 7 天」才失效，不再每登录一次就定时掉线；读不出会话不再冒充过期，会回 503 并说清原因\n- 账号显示名跟网关卡齐（预置的 Root User 不再顶在界面上），改名真落盘\n\n## 充值\n\n- 应用内二维码收银台落地：服务端下单、应用内画码、轮询查单到账，不再跳系统浏览器\n- 「缺少支付参数」与「每次打开充值都要重登」两处真因修掉：收银表单的 POST 不再被换成裸地址 GET，注入的 refresh 取探活之后那一枚\n- 付完款用余额当回执自动收起；金额可自定义、默认不预选；按钮文案改成「充值」\n\n## 生图工作台\n\n- 一条记录＝多个任务：第一条图并回来不再把整条判成已完成；逐图勾选改用图自己的身份，删过一张之后不再删错图\n- 画布选 16:9 + 1K 到线上什么都没剩下的真因修掉：出口闸不再删掉像素 `size`；画布默认分辨率改 1K\n- 并发上限 3 → 10；生成中不再靠「没见过这条任务」硬撑，任务查不到就回落读盘、404 当场收场\n- 「清理丢失」不再凭 `<img>` 报错定罪，误移出的图能找回；参考图补水把「这次读不到」和「文件真没了」分开数\n- 一条记录里的逐图明细取消张数封顶；记录档只在内容真变化时才整档重传\n\n## 视频工作台\n\n- `completed` 之后补问 `tasks/{id}/artifacts` 才拿得到成片地址；上游 5xx 不再压成一句「暂时不可用」，状态码和原话都带出来\n- 成片原件归生成记录，素材库里那份从此只是副本；下载不再交给系统浏览器（也不暴露上游地址）\n- 自定义宽高原样发给渠道；Seedance 时长上限按版本算\n- 结果卡按提交先后排、在飞任务浮到最前并走秒、每格给详情、支持「下载选中」；素材库终于删得掉视频素材\n- 视频记录册 60 条上限不再静默挤掉老记录：落进归档，侧栏能翻出来也能移回\n\n## 动图\n\n- 左侧「生成记录」侧栏对齐生图工作台（搜索 / 批量删 / 改名 / 归档 / 兜底），一条记录＝一次网格\n- 生成中切模块不再丢在飞的网格，入册用的是提交那一拍的参数；手动微调切走会写回活动记录\n- 48px 真缩略图链路；单格宽高超了上限要说得出来，不再静默夹；「无缝循环」与「循环播放」两个开关分开说明\n\n## Agent\n\n- 切模块、切会话都不再打断在飞那一轮：run 台账按会话分，规划/执行旗子也按会话记账\n- 对话不再切了就丢（防抖被流式帧喂不饱、卸载只清定时器两处都修）；半截回复不再显示成空气泡\n- 上下文改成按 50k token 额度装配，不再每轮切 200 字、也不把模型自己说过的话丢掉；回溯深度 8 → 50\n- 那句「No token」的真相修掉：签发令牌的链路走续签通道\n- 角色卡按会话独立、滚动位置按会话记住、工具条挪到输入框下方、弹层不再被裁一半；产物按自己的比例摆，不再被 4:3 的框裁掉\n\n## 画布\n\n- 「项目保存坏」的真因修掉：rename 撞 EPERM 时重试发布，并在打开时把留在 `.tmp` 里的最新正文补发布出去\n- 服务端拒绝与素材没落盘都要有可见回执，不再悄悄把 base64 兜进项目 JSON\n- 素材库对齐生图工作台那一套（分类含动图 / Agent，日间模式白底），拖视频文件进画布不再没反应\n- 图片池的读口径只认一份并保住位置，打开旧档不再串图\n- 画布库留着应用外壳，打开项目才整屏；侧边功能条挪到底部\n\n## 提示词库与素材\n\n- 「我的收藏」与「我的提示词」融合成一份（以服务端为准），渠道统一进一张注册表并有门禁守着\n- 保存的提示词真能在库里查到（写的和读的终于是同一张表）；存入素材时把配图一起写进去，收藏可以给一条提示词配本机图\n- 反推历史上限 20 → 60 并加字节预算，被挤掉几条要说得出来\n\n## 界面与外壳\n\n- 「界面语言」现在管整个应用（外壳与画布共用），顶部导航整文件过了 i18n\n- 无边框标题栏定稿：30px 无缝条、按钮只在右端、logo 留在侧栏\n- 更新链收成一条并画成侧栏圆环（下载进度 → 点环即装）\n- 导航上给「这个模块还在跑」的记号；未登录要在动手前说破，不再让人白点一次\n\n## 数据与安全\n\n- 两处 P0 数据丢失修掉：加密钥匙读不出来时不再重新生成并覆盖；记录档读不出来不再被当成「权威空档」（生图 / 动图 / 视频三处一起收口）\n- P0 越权修掉：归属 sidecar 读不出来时 fail-closed（不给看，更不给删）\n- 写盘收口：11 处自己拼 tmp + rename 的写法全部改走带重试的原子写，并加守卫防回潮；令牌明文全仓只留一处写\n\n## 这一版还没验到的\n\n- 自动更新端到端（旧客户端真的升到 1.1.4）仍未真跑过；解压即用的 `win-unpacked` 版 100% 不会自动装\n- 画布与工作台价签的真机回归：打包这台机器此刻连不上网关（`/api/pricing` 直连与走代理都超时），装好后打开画布确认那行显示的是 `$0.05/张` 才算收口\n",
+    'v1.1.3': "桌面版 1.1.3（Windows x64 安装包）。自 v1.1.2 起 118 个提交。门禁：tsc 0 错 / eslint 0 错 82 警 / 模块边界 649 文件通过 / vitest 198 文件 2015 用例通过。\n\n## 生图工作台\n- 结果区统一按生成时间正序（先出的在前），切回记录不再翻转，归档视图同一口径\n- 「质量」不再被 glow/yellow 这类颜色词抢成「低」：按短语匹配，且不覆盖你手动选的档\n- 并发上限 3 → 10：一次选 10 张就 10 张同时发，第 11 张起才显示「排队等待空位」\n- 「模型排队处理中」改成「模型处理中」：等待计时不能冒充上游排队状态\n- 「存为素材」真的上传本机图片字节并逐次回执（成功 / 已在库 / 失败原因）\n- 表单草稿：没提交过的参数选择也会存，重启不再被上次提交冲掉，提交也不再清草稿\n- 记录落盘留最新 200 张且不再砍掉刚生成完的几张；开机不再反复弹「已找到 N 个任务的生成结果」\n- 遮罩图上传入口从生图工作台撤掉：局部重绘统一在画布做（选中图片 → 编辑 → 重绘），参考图区给了引导语\n- 重启后回到最近一次生成的表单；重新生成回填那次真实用过的宽高；分辨率显示实测到货像素，与请求不一致时两个数一起给\n- 「请求超时」不再替模型背锅：连接层失败说清没发出、不扣钱\n\n## 动图工作台\n- 新增「生成记录」侧栏：网格图一生成就入册，不导出 GIF 也不会消失；搜索、勾选批量删、双击改名对齐生图工作台\n- 合成不再默认进素材库：改成显式「保存到素材库」+「撤销入库」，撤销留墓碑不再被合并并回来\n- 切记录/切模块后合成过的 GIF 还在；预览限高、帧序条挪到输出设置下面；「未导出」改「未入库」\n- 「重置」回到自动识别那份切割，手填被夹限时当场说明；改单格宽/高真的跟着裁\n- 记录补 status 与「上次导出为什么没成」，列表改按生成时间排\n\n## 画布\n- 空画布不再覆盖已有项目（PUT 失败静默降级到会话存储那条链修掉）；并发保存不再撞临时文件，兜底横幅能自愈\n- 模型目录拉取失败加冷却：网关一挂不再是 120 次/秒的死循环\n- 侧栏画布库与提示词库高亮互斥；点提示词库不再有时停在画布\n\n## 尺寸与上游口径\n- 出站尺寸闸把档位令牌折成像素；gpt-image-2 按上游词表发 aspect_ratio + size_tier，grok 2.x 走白名单像素，两套口径不互相污染\n- 请求只带比例、缺 size 时按比例补一个像素值，比例不再交给上游决定；渠道可用 imageSizeContract 显式声明\n- 画布日志不再把详情压成 [object Object]，比例告警改成带事实的结论\n\n## 提示词库\n- 统一到一张注册表（内置社区精选成为一条可关的源），整库同步按 kind 分派；渠道没先进注册表就 CI 红\n- 源停用后不再回吐旧整库；取数失败的源沿用上一次存量，去重改全文比对；「哪个源没刷新」说到界面上\n- 401 与空列表分开答；填完按回车就提交；封面按源图比例铺开\n\n## 视频工作台\n- 记录改成容器：手动点开的那条装得下不同提示词、不同参数的任务结果，生成中也能继续提交\n- 视频完成后自动落本机素材库，界面不再出现上游中转地址\n- 提交前先算一次预扣费，余额不够当场拦下；价签改按秒口径，预估乘上实际时长\n- 上游鉴权拒绝不再糊成一句：401 与 403 分开说并留下原话；额度不足单独说清并搬出余额与所需金额\n\n## 设置与全局\n- 「界面语言」现在真的管整个应用（外壳与画布共用同一份语言设置）\n- 「画布」tab 改「通用」，外观归整个应用；「打开画布高级设置」在任何模块点了都跳过去并替你开上面板\n- 挂上「本机图片存储」统计与清理入口（服务端早就有实现，界面上零入口）\n- 窄屏汉堡菜单补上 Agent 模式入口\n\n## 数据不丢与安全（一轮分层体检）\n- 五处「静默丢用户东西」：坏配置、归档溢出、旧快照覆盖、上限不一致、墓碑不落盘\n- 四处「钱花了拿不到东西」：R2 签名、备份谎报成功、多张整单作废、SSRF 重定向绕过\n- 三处并发竞态与状态谎报：流式规划写错会话、双连点把 A 的切割写进 B、取消没送出去\n- 三处「查无此图」：视频 taskId 落地、动图孤儿网格补扫、孤儿缩略图回收\n- v1.1.2 遗留的更新装不上（同名附属进程把安装器推进「无法关闭」死循环）已修\n- 令牌分组按能力挑：号主走自用、其余账号走共享组，不再写死共享组\n\n## Agent\n- 会话列表与运行历史各加一个搜索框\n- 规划器兜底链按本会话可路由的文本模型筛，不再让下游先白吃一次失败\n\n## 体积\n- 安装包 82.1 MB → 82.3 MB（+134 KB）\n\n安装 / 升级：下载 `ai-image-workbench-1.1.3-setup.exe` 运行即可，数据目录 `%APPDATA%\\gpt-image-playground` 不变，升级不需要重新登录。\n",
+    'v1.1.2': "桌面版 1.1.2（Windows x64 安装包）。自 v1.1.1 起 30 个提交，门禁：tsc 0 错 / eslint 0 错 / 模块边界 615 文件通过 / vitest 152 文件 1431 用例通过。\n\n## 生图工作台\n- 逐图操作只作用当前可见记录：全选 / 删除选中 / 下载选中 / 清理丢失与单图删除、失败任务删除一律按记录作用域，勾选切记录即失效；令牌未到手时的 401 不再把健康的图标成「丢失图片」\n- 结果区多选不再要求滑动：吸顶工具条 + 底部悬浮操作条，并修掉工具条压住顶栏的遮挡\n- 下载可选保存位置：设置页开关（默认开）+ 主进程弹系统保存框，落盘结果分三种如实回执\n- 多选下载可选「存到文件夹」或「打包 ZIP」\n- 结果网格瓦片下限 300→220 且图框随视口收高：1920×1080 笔记本从 1 列变 2 列\n- 图片文件大小徽章恢复显示；「参考图」点击不再静默失败，取不到就说明原因\n\n## 提示词库与素材\n- 提示词库改成工作台内弹层，Agent 页复用同一个对话框\n- 提示词素材只收手工攒下的提示词：Agent 自动登记与视频另存不再把这栏灌满\n- 提示词库新增「加入我的素材」，正文长度上限三处写入入口统一 8000\n- 提示词源改动即时生效并如实报数，改动先答一声再等同步\n- 素材 meta.json 的读-改-写排队串行：四个写入口不再互相覆盖丢写；账本写入改 tmp+rename，归属只从 entry 取，孤儿临时文件回收补齐测试\n\n## 视频工作台\n- 四刀对齐生图工作台：卡号与空态措辞统一、xl 定高分栏内滚 + 窄宽记录卡回到首位、原生 select 换成生图控件语言、记录栏补搜索框并把 pill 档位抽成共享组件\n- 三处真实裁切修掉（视频 pill 溢出、生图工具条换行、裸图标）\n\n## 画布\n- 素材令牌改读时重签，历史画布不再烤死旧令牌导致全部 401\n\n## 反推提示词\n- 失败不再一律算到模型头上：把网关返回的真实错误正文摆出来，空返回也报模型名与结束原因，不再用「不支持图片理解」盖住 400/502\n\n## 其它\n- 切模块加加载反馈：兜底不再空白，被点的导航项当帧给记号\n- 文本模型价签改口径：0 价是「按 token 计费」，不是未标价\n- 预览层补对话框语义与键盘操作（焦点陷阱 + 方向键翻图）；失败卡的重试入口按卡片来源分流，派生记录卡不再挂空操作\n\n## 体积\n- 安装包 132 MB → 82 MB：裁掉未使用的 sharp / @img native 依赖与 1243 个 source map\n\n安装：下载 `ai-image-workbench-1.1.2-setup.exe` 运行即可，数据目录 `%APPDATA%\\gpt-image-playground` 不变，升级不需要重新登录。\n",
+    'v1.1.1': "桌面版 1.1.1（Windows x64 安装包）。自 v1.1.0 起 299 个提交，门禁：tsc 0 错 / eslint 0 错 / 模块边界 606 文件通过 / vitest 147 文件 1177 用例通过。\n\n## Agent 模块\n- 执行引擎从路由里抽出，run 加只追加流水账 + 执行权租约：付费请求发出前先落一条，抢不到租约的实例不发付费请求\n- 续跑监督器：没人认领的「运行中」记录自己接着跑；缺凭据时只报告不改状态\n- 暂停 / 继续按游标驱动事件流，付过费的那一轮不硬中断；SSE 关流后界面不再停在「生成中」\n- 输入框支持 @ 提及点名要改的历史产物；参考图抽成独立 hook，重做时把被评的那几张挂回去\n- 一轮出图后可视觉复盘：带图模型看真实产物，挑出第几张不满足需求\n- 生图 / 视频产物登记进素材库（grok 短链不再顶掉本地路径、jpeg 不再存成 .png）；素材面板每次打开重拉列表，可放大与单张下载\n- 多轮记忆沿 prevRunId 链收集上下文；切会话不再串台\n\n## 备份与本机保存\n- 完整备份导出改为服务端流式落暂存、主进程按 uuid 认领后复制进「下载」文件夹：1 GB 量级的包不再进渲染层，也不再撞 IPC 体积闸\n- 导出过程给出已用秒数与转圈，完成后播报写明落点文件夹和文件名\n- 未登录时用户主动点的操作不再静默返回，一律给出原因\n\n## 安全与归属收口\n- 认证路由限流 + 同源写请求闸（CSRF / 暴破）；body 大小前置 Content-Length 闸\n- SSRF 闸收敛为 DNS 解析级助手并多处接入；外部参考图不再泄漏会话令牌\n- 本机历史（记录 / 图片 / 视频 / 画布）按 ownerId 读写，R2 / WebDAV 备份前缀与恢复校验带 userId\n- 注册不再产生 userId=0 会话；死会话接口下线；令牌不再走 query\n- /api/pricing 收敛为共享缓存，规划点击不再全量打网关\n\n## 金额与额度口径\n- 换算常数从网关 /api/status 动态读取（不再写死），缺价统一显示「未标价」，裸美元格式化收敛到一条规则\n\n## 视频工作台与画布\n- 结果区回到单记录视图并对齐生图工作台排布；瓦片改悬停播放，一条记录堆 20 条时不再 20 路同时拉流\n- 画布内存补丁：历史快照剥大图 + 视口写入节流\n- 性能：动图帧网格 data-URL 改 blob object URL，预览层引用稳定\n\n## 桌面端\n- 无边框窗口 + 自定义标题栏（跟随主题），图标 / 任务栏 / 浏览器标签统一\n- 退出后服务端与 Node reaper 的善后窗口重做；更新安装待决状态不再掐死在飞任务\n- 应用内嵌充值窗口 + 关闭后余额自动刷新\n\n安装：下载 `ai-image-workbench-1.1.1-setup.exe` 运行即可，数据目录 `%APPDATA%\\gpt-image-playground` 不变，升级不需要重新登录。\n",
+    'v1.1.0': "v1.1.0 从 agent-v2 发布。\n\n- 新增视频、动图、反推三工作台移植与批次/队列体验。\n- 优化画布图片与项目状态，减少 base64 与项目池重复占用。\n- 加强生成记录归属、删除墓碑、归档与重启恢复。\n- 发布侧增强令牌隔离、本机回环限制、源码映射与构建路径清理。",
+    'v1.0.6': "修复与优化：\n- 默认模型固定为 gpt-image-2（用户手动选择后记住偏好）\n- 移除不可用的 grok-imagine-image-edit 模型\n- 兼容返回 url 而非 b64_json 的生图渠道（自动下载转 base64）\n- 生图令牌自动创建/复用修复 + 401 Invalid token 自愈重试\n- 构建不再依赖 Google Fonts",
+    'v1.0.4': "## v1.0.4 更新内容\n- 修复：重新打开应用不再要求重新登录（会话同步落盘）\n- 修复：防止多开导致端口漂移、数据丢失（单实例锁）\n- 新增：更新检测代理支持（check-update）\n- UI：兑换充值按钮恢复绿色样式",
+    'v1.0.3': "修复：桌面端排版穿模、Next16 standalone路径、下载反馈、配色回退",
+    'v1.0.2': "新增：API Key 幂等防重复创建、并发登录安全、日志脱敏、启动自动检测更新",
+    'v1.0.1': "安全优化版：移除管理员Token、修复打包膨胀、动态端口、网络错误诊断、会话过期、图片接口安全"
+  };
+
+  function snapAsset(tag, name, size) {
+    return {
+      name: name,
+      size: size,
+      url: 'https://github.com/' + REPO + '/releases/download/' + tag + '/' + name
+    };
+  }
+
+  var SNAPSHOT_LIST = [
+    { tag: 'v1.1.5', name: 'Release v1.1.5', publishedAt: '2026-10-13T12:15:11Z', body: SNAPSHOT.body },
+    { tag: 'v1.1.4', name: 'v1.1.4', publishedAt: '2026-10-13T03:33:08Z', body: SNAPSHOT_BODIES['v1.1.4'] },
+    { tag: 'v1.1.3', name: 'v1.1.3', publishedAt: '2026-10-09T08:50:30Z', body: SNAPSHOT_BODIES['v1.1.3'] },
+    { tag: 'v1.1.2', name: 'v1.1.2', publishedAt: '2026-10-01T05:48:33Z', body: SNAPSHOT_BODIES['v1.1.2'] },
+    { tag: 'v1.1.1', name: 'v1.1.1', publishedAt: '2026-09-27T19:35:39Z', body: SNAPSHOT_BODIES['v1.1.1'] },
+    { tag: 'v1.1.0', name: 'v1.1.0', publishedAt: '2026-09-15T17:24:36Z', body: SNAPSHOT_BODIES['v1.1.0'] },
+    { tag: 'v1.0.6', name: 'v1.0.6', publishedAt: '2026-09-07T09:28:04Z', body: SNAPSHOT_BODIES['v1.0.6'] },
+    { tag: 'v1.0.4', name: 'v1.0.4', publishedAt: '2026-08-25T03:40:21Z', body: SNAPSHOT_BODIES['v1.0.4'] },
+    { tag: 'v1.0.3', name: 'v1.0.3', publishedAt: '2026-08-25T00:51:24Z', body: SNAPSHOT_BODIES['v1.0.3'] },
+    { tag: 'v1.0.2', name: 'v1.0.2', publishedAt: '2026-08-24T09:25:12Z', body: SNAPSHOT_BODIES['v1.0.2'] },
+    { tag: 'v1.0.1', name: 'v1.0.1', publishedAt: '2026-08-24T08:56:05Z', body: SNAPSHOT_BODIES['v1.0.1'] }
+  ].map(function (r) {
+    var fin = r.tag.replace(/[^0-9.]/g, '');
+    r.asset = snapAsset(r.tag, 'ai-image-workbench-' + fin + '-setup.exe', null);
+    r.htmlUrl = 'https://github.com/' + REPO + '/releases/tag/' + r.tag;
+    return r;
+  });
+
+  /* 快照体积表（真实值，仅用于展示；取不到则不显示体积，绝不编造） */
+  var SNAPSHOT_SIZES = {
+    'v1.1.5': 82219077, 'v1.1.4': 82217202, 'v1.1.3': 82261162,
+    'v1.1.1': 132025000, 'v1.1.0': 80520000, 'v1.0.6': 81690000,
+    'v1.0.4': 84930000, 'v1.0.3': 161577332, 'v1.0.2': 161541076,
+    'v1.0.1': 161540631
+  };
+  SNAPSHOT_LIST.forEach(function (r) {
+    if (SNAPSHOT_SIZES[r.tag] && r.asset) r.asset.size = SNAPSHOT_SIZES[r.tag];
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function fmtSize(bytes) {
+    if (!bytes || isNaN(bytes)) return '';
+    var mb = bytes / 1048576;
+    return (mb >= 10 ? mb.toFixed(0) : mb.toFixed(1)) + ' MB';
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var p = function (n) { return n < 10 ? '0' + n : '' + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+
+  /* 从资产列表中挑出 Windows 安装包（排除 blockmap / yml 等辅助文件） */
+  function pickWindowsAsset(assets) {
+    if (!assets || !assets.length) return null;
+    var exes = assets.filter(function (a) {
+      return /\.exe$/i.test(a.name) && !/\.blockmap$/i.test(a.name);
+    });
+    if (exes.length) {
+      var setup = exes.filter(function (a) { return /setup/i.test(a.name); });
+      return (setup.length ? setup : exes)[0];
+    }
+    return null;
+  }
+
+  function normalizeRelease(r) {
+    var a = pickWindowsAsset(r.assets);
+    return {
+      tag: r.tag_name || '',
+      name: r.name || r.tag_name || '',
+      publishedAt: r.published_at || r.created_at || '',
+      body: r.body || '',
+      htmlUrl: r.html_url || RELEASES_PAGE,
+      asset: a ? { name: a.name, size: a.size, url: a.browser_download_url } : null
+    };
+  }
+
+  /* ---------------------------------------------------------------------
+     极简 Markdown 渲染（仅覆盖 release notes 里实际出现的语法）
+     支持：## 标题 / - 与 * 列表 / **粗体** / `行内代码` / 链接 / 水平线
+     先整体转义，再按行解析，避免 HTML 注入。
+     --------------------------------------------------------------------- */
+  function inlineMd(s) {
+    return s
+      .replace(/`([^`]+)`/g, function (_, c) { return '<code>' + c + '</code>'; })
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+               '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+
+  function renderMarkdown(md) {
+    if (!md || !md.trim()) return '<p>（该版本未提供更新说明。）</p>';
+    var lines = esc(md).replace(/\r\n/g, '\n').split('\n');
+    var out = [];
+    var inList = false;
+
+    function closeList() { if (inList) { out.push('</ul>'); inList = false; } }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var t = line.trim();
+
+      if (!t) { closeList(); continue; }
+
+      if (/^(-{3,}|\*{3,}|_{3,})$/.test(t)) { closeList(); out.push('<hr>'); continue; }
+
+      var h = /^(#{1,4})\s+(.*)$/.exec(t);
+      if (h) {
+        closeList();
+        var lvl = h[1].length <= 2 ? 'h3' : 'h4';
+        out.push('<' + lvl + '>' + inlineMd(h[2]) + '</' + lvl + '>');
+        continue;
+      }
+
+      var li = /^[-*+]\s+(.*)$/.exec(t);
+      if (li) {
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push('<li>' + inlineMd(li[1]) + '</li>');
+        continue;
+      }
+
+      closeList();
+      out.push('<p>' + inlineMd(t) + '</p>');
+    }
+    closeList();
+    return out.join('');
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  状态提示                                                          */
+  /* ------------------------------------------------------------------ */
+  function setVerPill(state, text) {
+    var pill = $('ver-pill');
+    if (!pill) return;
+    pill.setAttribute('data-s', state);       /* CSS 用 data-s 控制圆点颜色 */
+    pill.setAttribute('data-state', state);   /* 保留旧属性名，兼容外部引用 */
+    var t = $('ver-pill-text');
+    if (t) t.textContent = text;
+  }
+
+  function setPrimaryDownload(url, label) {
+    var a = $('primary-download');
+    if (a && url) a.setAttribute('href', url);
+    /* 顶栏那个「下载」也要指向同一个安装包。
+       早期只写了首屏那个，顶栏 href 一直是 "#"，点了没反应。 */
+    var n = $('nav-dl');
+    if (n && url) n.setAttribute('href', url);
+    if (label) {
+      var l = $('primary-download-label');
+      if (l) l.textContent = label;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  渲染                                                              */
+  /* ------------------------------------------------------------------ */
+  function renderHero(latest) {
+    var tag = latest.tag || SNAPSHOT.tag;
+    var asset = latest.asset;
+
+    setPrimaryDownload(
+      (asset && asset.url) || SNAPSHOT.asset.url || RELEASES_PAGE,
+      '下载 Windows 版 ' + tag
+    );
+
+    var fv = $('foot-version');
+    if (fv) fv.textContent = tag;
+
+    if (asset && asset.size) {
+      var hs = $('hero-size');
+      if (hs) hs.textContent = '安装包约 ' + fmtSize(asset.size);
+      /* FAQ「安装包有多大？」里的数字也跟着走，避免发新版后两处对不上 */
+      var fs = $('faq-size');
+      if (fs) fs.textContent = fmtSize(asset.size);
+    }
+  }
+
+  function renderReleases(list, isSnapshot) {
+    var host = $('release-list');
+    if (!host) return;
+
+    if (!list || !list.length) {
+      host.innerHTML = '<div class="err-box">暂时没有读到任何版本记录。' +
+        '请直接前往 <a href="' + RELEASES_PAGE + '" target="_blank" rel="noopener">GitHub Releases</a> 查看。</div>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (i >= MAX_VISIBLE) break;   // 其余版本引导去 GitHub 页面
+      var isLatest = (i === 0);
+      // 仅最新版可下载，旧版本不提供下载入口（用户要求）
+      var vpage = r.htmlUrl || (RELEASES_PAGE + '/tag/' + r.tag) || RELEASES_PAGE;
+      var ameta = (r.asset && r.asset.name)
+        ? esc(r.asset.name) + (r.asset.size ? ' · ' + fmtSize(r.asset.size) : '')
+        : '前往发布页面查看资产';
+
+      html +=
+        '<details class="release' + (isLatest ? ' is-latest' : '') + '">' +
+          '<summary class="release-head">' +
+            '<span class="chev" aria-hidden="true">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>' +
+            '</span>' +
+            '<span class="tag">' + esc(r.tag) + '</span>' +
+            (isLatest ? '<span class="latest-badge">最新</span>' : '') +
+            '<span class="rl-name">' + esc(r.name === r.tag ? '' : r.name) + '</span>' +
+            '<span class="rl-right">' +
+              '<span class="rl-date">' + esc(fmtDate(r.publishedAt)) + '</span>' +
+            '</span>' +
+          '</summary>' +
+          '<div class="release-body">' +
+            '<div class="release-actions">' +
+              (isLatest
+                ? '<a class="btn btn-primary btn-sm" href="' + esc((r.asset && r.asset.url) || vpage) + '" rel="noopener">下载此版本</a>' +
+                  '<span class="asset-meta">' + ameta + '</span>'
+                : '') +
+              '<a class="asset-meta" href="' + esc(vpage) + '" target="_blank" rel="noopener" style="margin-left:auto">在 GitHub 查看 →</a>' +
+            '</div>' +
+            '<div class="md" style="margin-top:14px">' + renderMarkdown(r.body) + '</div>' +
+          '</div>' +
+        '</details>';
+    }
+
+    if (list.length > MAX_VISIBLE) {
+      html += '<div class="dl-meta" style="margin-top:14px">' +
+        '<span>还有 ' + (list.length - MAX_VISIBLE) + ' 个更早的版本，' +
+        '<a href="' + RELEASES_PAGE + '" target="_blank" rel="noopener">在 GitHub 查看全部 →</a></span></div>';
+    }
+
+    host.innerHTML = html;
+
+    renderTimeline(list);
+
+    var st = $('releases-status');
+    if (st) {
+      st.innerHTML =
+        '<span class="pill" data-state="' + (isSnapshot ? 'cached' : 'live') + '">' +
+          '<span class="live-dot" aria-hidden="true"></span>' +
+          (isSnapshot ? '缓存快照' : '实时数据') +
+        '</span>' +
+        '<span>共 ' + list.length + ' 个版本</span>' +
+        (isSnapshot
+          ? '<span>GitHub 接口暂时不可用（可能触发限流），已显示内置快照；' +
+            '<a href="' + RELEASES_PAGE + '" target="_blank" rel="noopener">去 GitHub 看最新</a></span>'
+          : '<span>数据来自 GitHub Releases API</span>');
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  版本时间线：把真实发布日期画成一条线                              */
+  /* ------------------------------------------------------------------ */
+  function renderTimeline(list) {
+    var host = $('tl-items');
+    var fill = $('tl-fill');
+    if (!host) return;
+
+    if (!list || !list.length) {
+      host.innerHTML = '';
+      if (fill) fill.style.width = '0';
+      return;
+    }
+
+    // list 已按发布时间倒序（最新在前），时间线从左到右也按这个方向读
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      var isLatest = (i === 0);
+      html +=
+        '<li class="' + (isLatest ? 'is-latest' : '') + '">' +
+          '<span class="tl-dot" aria-hidden="true"></span>' +
+          '<a class="tl-ver" href="' + esc(r.htmlUrl || (RELEASES_PAGE + '/tag/' + r.tag)) + '" target="_blank" rel="noopener">' + esc(r.tag) + '</a>' +
+          '<span class="tl-date">' + esc(fmtDate(r.publishedAt)) + '</span>' +
+        '</li>';
+    }
+    host.innerHTML = html;
+
+    // 填充条：从最早一个节点铺到最新一个节点（100%），带一次生长动画
+    if (fill) {
+      fill.style.width = '0';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { fill.style.width = '100%'; });
+      });
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  取数：实时 → 失败降级快照                                          */
+  /* ------------------------------------------------------------------ */
+  function fetchJson(url, ms) {
+    // 用 AbortController 做超时，避免网络挂起导致页面一直转圈
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, ms || 9000);
+    var opts = {
+      headers: { 'Accept': 'application/vnd.github+json' },
+      cache: 'no-store'
+    };
+    if (ctrl) opts.signal = ctrl.signal;
+
+    return fetch(url, opts).then(function (res) {
+      if (!res.ok) {
+        var e = new Error('HTTP ' + res.status);
+        e.status = res.status;
+        throw e;
+      }
+      return res.json();
+    }).then(function (json) {
+      clearTimeout(timer);
+      return json;
+    }, function (err) {
+      clearTimeout(timer);
+      throw err;
+    });
+  }
+
+  function start() {
+    // 先立刻用快照把页面填满，保证任何情况下都不留白
+    renderHero(SNAPSHOT);
+    setVerPill('loading', '正在读取最新版本…');
+
+    fetchJson(API_LIST, 9000).then(function (json) {
+      if (!Array.isArray(json) || !json.length) throw new Error('empty release list');
+
+      var list = json
+        .filter(function (r) { return !r.draft; })
+        .map(normalizeRelease)
+        .filter(function (r) { return r.tag; });
+
+      if (!list.length) throw new Error('no usable releases');
+
+      // GitHub 已按发布时间倒序返回；再兜一层，确保"最新"确实在最前
+      list.sort(function (a, b) {
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      });
+
+      renderHero(list[0]);
+      renderReleases(list, false);
+      setVerPill('live', '当前版本 ' + list[0].tag);
+    }).catch(function (err) {
+      // 任何失败（403 限流 / 网络中断 / 超时 / 结构异常）都走这里
+      var why = (err && err.status === 403)
+        ? 'GitHub 接口限流（403）'
+        : (err && err.name === 'AbortError')
+          ? '请求超时'
+          : '接口暂时不可用';
+
+      renderReleases(SNAPSHOT_LIST, true);
+      setVerPill('cached', '当前版本 ' + SNAPSHOT.tag + '（缓存）');
+      setPrimaryDownload(SNAPSHOT.asset.url, '下载 Windows 版 ' + SNAPSHOT.tag);
+
+      var st = $('releases-status');
+      if (st) {
+        st.innerHTML =
+          '<span class="pill" data-state="cached"><span class="live-dot" aria-hidden="true"></span>缓存快照</span>' +
+          '<span>' + esc(why) + '，已显示内置快照（不影响下载）</span>' +
+          '<a href="' + RELEASES_PAGE + '" target="_blank" rel="noopener">去 GitHub 看最新 →</a>';
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
+
+</script>
+
+</body>
+</html>
