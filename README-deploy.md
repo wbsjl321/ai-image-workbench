@@ -117,13 +117,65 @@ $js = $t.Substring($t.IndexOf('<script>'), $t.IndexOf('</script>') - $t.IndexOf(
 
 ---
 
-## 2. 快速部署（通用）
+## 2. 已经上线了（GitHub Pages）
 
-把上表「必须上传」的三样复制到服务器的网站根目录即可：
+**当前线上地址：<https://wbsjl321.github.io/ai-image-workbench/>**
+
+用的是 `wbsjl321/ai-image-workbench`（那个本就公开、只放 Release 的仓库）的 `gh-pages` 分支，
+Pages 已经建好，HTTPS 强制开启（`https_enforced: true`），构建状态 `built`。
+
+### 怎么更新线上页面
+
+线上内容 = `gh-pages` 分支的根目录。改了 `landing/` 里的东西要重新推一次：
+
+```powershell
+# 1. 同步到部署工作副本
+Copy-Item landing\index.html   _deploy-pages\index.html   -Force
+Copy-Item landing\hero-bg.jpg  _deploy-pages\hero-bg.jpg  -Force
+Copy-Item landing\app-icon.png _deploy-pages\app-icon.png -Force
+Copy-Item landing\shots\ui-*.png _deploy-pages\shots\ -Force
+
+# 2. 提交并推
+cd _deploy-pages
+git add -A
+git commit -m "update landing"
+git push https://github.com/wbsjl321/ai-image-workbench.git gh-pages:gh-pages
+```
+
+推完等 **30～60 秒** Pages 会重新构建（实测约 40 秒）。`git push` 返回 0 不代表已生效，
+要回来看一眼线上返回的 HTML 里有没有你刚改的东西。
+
+### 部署工作副本
+
+`_deploy-pages/` 是从 `landing/` 挑出「必须上传」的四样重建的干净目录，
+**不含** `_preview-*.png` / `_ref-multica-*.png` / `_real-bodies.json` / `_schemes/` / `*.bak-*`。
+
+它只是一个 git 工作副本，**随时可以删**（需要时按上面的命令重建）。真正的线上内容在 GitHub 上。
+
+### 已知限制：国内访问
+
+`*.github.io` 在国内**不稳定**，部分地区/运营商可能打不开或很慢。
+如果主要受众在国内、且要当成正式发布页，需要换成自有域名 + 国内服务器（要 ICP 备案）。
+换域名的做法见下面「3. 按服务器环境分别怎么放」。
+
+### 如果想换成自己的域名
+
+有两种：
+
+1. **继续用 Pages，只把域名指过来**（不用服务器，但 github.io 的线路问题依旧）：
+   在 `gh-pages` 分支根目录加一个 `CNAME` 文件，内容就是域名（如 `dl.example.com`），
+   然后去域名 DNS 加一条 `CNAME dl → wbsjl321.github.io`。加完回 Pages 设置里勾 Enforce HTTPS。
+2. **搬到国内服务器**：见第 3 节，先办备案。
+
+---
+
+## 2.1 快速部署（自有服务器，通用）
+
+把上表「必须上传」的四样复制到服务器的网站根目录即可：
 
 ```bash
 # 本地 → 服务器（把路径换成你自己的）
-scp -r landing/index.html landing/app-icon.png landing/shots \
+scp -r landing/index.html landing/app-icon.png landing/hero-bg.jpg landing/shots \
   user@your-server:/var/www/yulinlin/
 ```
 
